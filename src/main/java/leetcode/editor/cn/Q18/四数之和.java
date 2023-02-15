@@ -38,12 +38,100 @@
 
 package leetcode.editor.cn.Q18;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
     public List<List<Integer>> fourSum(int[] nums, int target) {
-        return null;
+        List<List<Integer>> response = new ArrayList<>();
+        // 数组不够4个，直接返回个空集合就好了
+        if (nums == null || nums.length < 4) {
+            return response;
+        }
+        
+        // 排序，Log2N的复杂度
+        Arrays.sort(nums);
+
+        // 转化下，不然太大相加会变成负数
+        long[] longNums = new long[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            longNums[i] = nums[i];
+        }
+        
+        // 开始遍历，先固定第1位
+        int size = nums.length;
+        for (int i = 0; i < (size - 3); i++) {
+            // 与前一位相同，则后面能满足条件的数组包含在前一位固定的时候
+            if (i > 0 && nums[i] == nums[i-1]) {
+                continue;
+            }
+            
+            // 第一位固定，+ 最后面3个最大的值都小于target，那么再遍历也不会有符合条件的
+            if (longNums[i] + longNums[size - 1] + longNums[size - 2] + longNums[size - 3] < target) {
+                continue;
+            }
+            
+            // 第一位固定，+ 最前面3个最小的值都大于target,那么再遍历也不会有符合条件的
+            if (longNums[i] + longNums[i+1] + longNums[i+2] + longNums[i+3] > target) {
+                continue;
+            }
+            
+            // 开始固定第2位，需要在第一位后面
+            for (int j = i + 1; j < (size - 2); j++) {
+
+                // 与前一位相同，则后面能满足条件的数组包含在前一位固定的时候
+                if (j > i + 1 && nums[j] == nums[j-1]) {
+                    continue;
+                }
+
+                // 第1,2位固定，+ 最后面2个最大的值都小于target，那么再遍历也不会有符合条件的
+                if (longNums[i] + longNums[j] + longNums[size - 1] + longNums[size - 2] < target) {
+                    continue;
+                }
+
+                // 第1,2位固定，+ 最前面2个最小的值和都大于target,那么再遍历也不会有符合条件的
+                if (longNums[i] + longNums[i+1] + longNums[i+2] + longNums[j] > target) {
+                    continue;
+                }
+                
+                // 第3，4位用双指针即可
+                int x = j + 1;
+                int y = size -1;
+                
+                // 第3，4位和的值
+                long sum = target - (longNums[i] + longNums[j]);
+                
+                // 开始移动双指针
+                while(x < y) {
+                    // 还差的数值, result > 0 则说明需要x指针前进
+                    long result = sum - (longNums[x] + longNums[y]);
+                    if (result == 0) {
+                        response.add(Arrays.asList(nums[i], nums[j], nums[x], nums[y]));
+                        x++;
+                        while (x < y && nums[x-1] == nums[x]) {
+                            x ++;
+                        }
+                        y--;
+                        while (x < y - 1 && nums[y+1] == nums[y]) {
+                            y --;
+                        }
+                    } else if (result > 0) {
+                        x++;
+                    } else {
+                        y--;
+                    }
+                }
+            }
+        }
+
+
+        return response;
+    }
+
+    public static void main(String[] args) {
+        new Solution().fourSum(new int[]{0,0,0,1000000000,1000000000,1000000000,1000000000}, 1000000000);
     }
 }
 //leetcode submit region end(Prohibit modification and deletion)
